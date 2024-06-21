@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Posts</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        #output {
+            margin-top: 20px;
+        }
+        .output {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Posts</h1>
+    
+    <!-- Form to add a new post -->
+    <form id="postForm">
+        <input type="text" id="postName" placeholder="Enter post name" required />
+        <button type="submit">Add Post</button>
+    </form>
+
+    <button onclick="showPosts()" id="get-posts-btn">Get Posts</button>
+    <div id="output"></div>
+
+    <script>
+        const output = document.querySelector('#output');
+        const postForm = document.querySelector('#postForm');
+        const postName = document.querySelector('#postName');
+
+        async function showPosts() {
+            try {
+                const res = await fetch('http://localhost:8000/api/posts');
+                if (!res.ok) {
+                    throw new Error('Failed to fetch');
+                }
+                const posts = await res.json();
+                output.innerHTML = '';
+                posts.forEach((post) => {
+                    const postEl = document.createElement('div');
+                    postEl.className = 'output';
+                    postEl.textContent = post.name;
+                    output.appendChild(postEl);
+                });
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        postForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                const res = await fetch('http://localhost:8000/api/posts', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name: postName.value })
+                });
+                if (!res.ok) {
+                    throw new Error('Failed to send post');
+                }
+                postName.value = '';
+                showPosts(); // Refresh the posts list
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        });
+
+        // Initially load posts when the page loads
+        showPosts();
+    </script>
+</body>
+</html>
+
+</body>
+</html>
